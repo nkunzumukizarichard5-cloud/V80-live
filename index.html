@@ -1,1 +1,40 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>V80 FINAL PAT</title><style>body{background:#0a0f1f;color:#0f0;font-family:monospace;padding:8px}input,button{padding:12px;margin:5px;background:#111;color:#0f0;border:1px solid #0f0;width:95%;border-radius:6px}#log{background:#000;height:400px;overflow:auto;padding:8px;border:1px solid #0f0;white-space:pre-wrap}button{background:#0f0;color:#000;font-weight:bold}</style></head><body><h3 style="text-align:center">V80 LIVE PAT FINAL ✅</h3><input id="token" type="password" placeholder="Paste pat_ token here"><input id="appId" value="340ryO6dGpKs2Q1zTHMP"><button onclick="connectPAT()">CONNECT WITH PAT</button><div>Status:<b id="status">Disconnected</b> Bal:<b id="balance">-</b></div><div id="log">READY: Paste token + CONNECT</div><script>let ws=null;function log(m){let l=document.getElementById('log');l.innerText+="\n"+m;l.scrollTop=l.scrollHeight;}async function connectPAT(){const t=document.getElementById('token').value.trim();const a=document.getElementById('appId').value.trim();if(!t.startsWith('pat_')){log('ERROR: Must be pat_ token');return;}log('Step1 GET accounts AppID '+a);try{let r=await fetch('https://api.derivws.com/trading/v1/options/accounts',{headers:{'Authorization':'Bearer '+t,'Deriv-App-ID':a}});let j=await r.json();log(JSON.stringify(j).slice(0,700));if(!j.data||!j.data.length){log('No accounts found');return;}let acc=j.data[0];log('Using account '+acc.id);let r2=await fetch('https://api.derivws.com/trading/v1/options/accounts/'+acc.id+'/otp',{method:'POST',headers:{'Authorization':'Bearer '+t,'Deriv-App-ID':a}});let j2=await r2.json();log(JSON.stringify(j2).slice(0,700));let u=j2.data?.websocket_url;if(!u){log('No WS URL');return;}log('Connecting '+u.slice(0,50));ws=new WebSocket(u);ws.onopen=()=>{log('✅ CONNECTED! AUTHORIZED!');document.getElementById('status').innerText='Connected ✅';ws.send(JSON.stringify({balance:1}));};ws.onmessage=(e)=>{let d=JSON.parse(e.data);if(d.msg_type==='balance'){document.getElementById('balance').innerText=d.balance.balance+' '+d.balance.currency;log('💰 BALANCE: '+d.balance.balance);}log('<< '+e.data.slice(0,180));};ws.onclose=()=>{log('Closed');document.getElementById('status').innerText='Disconnected';};ws.onerror=()=>{log('WS Error');};}catch(e){log('FETCH ERROR: '+e);}}</script></body></html>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>V80 LIVE PAT V81 FIXED FULL BOT</title>
+<style>
+body{background:#020a18;color:#00ff88;font-family:monospace;margin:0;padding:10px}
+h2{text-align:center;color:#00ff88;margin:6px}
+.card{background:#081428;border:1px solid #00ff88;border-radius:10px;padding:10px;margin:8px 0}
+input,select{width:100%;padding:12px;margin:5px 0;background:#001122;color:#00ff88;border:1px solid #00ff88;border-radius:6px;box-sizing:border-box}
+button{width:100%;padding:14px;margin:5px 0;background:#00ff88;color:#000;font-weight:bold;border:none;border-radius:8px;font-size:16px}
+button.stop{background:#ff3355;color:#fff}
+#log{background:#000;border:1px solid #00ff88;height:340px;overflow:auto;padding:8px;font-size:11px;white-space:pre-wrap}
+.row{display:flex;gap:6px}.row>div{flex:1}
+.bal{font-size:22px;text-align:center;color:#fff}
+</style>
+</head>
+<body>
+<h2>V80 LIVE PAT V81 ✅ FIXED</h2>
+<div class="card">
+<input id="pat" type="text" placeholder="Paste PAT here pat_4e48... (VISIBLE)">
+<input id="appid" type="text" value="1089">
+<div class="row"><div><button onclick="connectPAT()">CONNECT WITH PAT</button></div><div><button class="stop" onclick="stopBot()">STOP</button></div></div>
+<div class="bal">Status: <span id="status">Disconnected</span><br>Balance: <span id="bal">-</span> <span id="curr"></span></div>
+</div>
+
+<div class="card">
+<div class="row">
+<div><label>Stake $</label><input id="stake" type="number" value="1" step="0.35"></div>
+<div><label>Martingale x</label><input id="marti" type="number" value="2.1" step="0.1"></div>
+</div>
+<div class="row">
+<div><label>Strategy</label><select id="strat"><option value="OVER">Digit OVER 3</option><option value="UNDER">Digit UNDER 6</option><option value="EVEN">Digit EVEN</option><option value="ODD">Digit ODD</option></select></div>
+<div><label>Ticks</label><input id="ticks" type="number" value="1"></div>
+</div>
+<button onclick="startBot()">START V80 BOT</button>
+</div>
+
+<div id="log">READY V81
