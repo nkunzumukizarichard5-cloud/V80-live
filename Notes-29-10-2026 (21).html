@@ -1,0 +1,31 @@
+<html>
+        <head><title>Downloaded HTML</title></head>
+        <body>
+            <pre style="white-space: pre-wrap; word-wrap: break-word;"><!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>V79 PROXY LIVE</title><style>body{background:#000;color:#0f0;padding:10px;font-family:monospace;text-align:center}h2{color:#ff0}#b{background:#222;color:#0ff;padding:12px;border-radius:8px;font-size:22px}#l{background:#111;color:#fff;padding:8px;margin-top:8px;text-align:left;font-size:13px;max-height:400px;overflow:auto}</style></head><body><h2>V79 LIVE - drivetrade.pro PROXY FIX</h2><div id=b>START V79 PROXY...</div><div id=l>Log...</div><script>
+let digits=[],cnt=0;let box=document.getElementById('b'),logEl=document.getElementById('l');
+function log(m){logEl.innerHTML=m+'<br>'+logEl.innerHTML.slice(0,2000);}
+function got(s){let last=parseInt(s.toString().slice(-1));if(isNaN(last))return;digits.push(last);if(digits.length>100)digits.shift();cnt++;box.innerText='LIVE #'+cnt+' LAST:'+last+' PRICE:'+s+' OK PROXY';let c=[0,0,0,0,0,0,0,0,0,0];for(let d of digits)c[d]++;let out='LIVE V79 Count:'+digits.length+'<br>';for(let i=0;i<10;i++)out+='Digit '+i+': '+c[i]+' ('+(digits.length?Math.round(c[i]/digits.length*100):0)+'%)<br>';logEl.innerHTML=out+'<br>Price:'+s+'<br><br>'+logEl.innerHTML.slice(0,1000);}
+async function fetchProxy(){
+ // 3 proxies that add CORS - these are HTTPS and NOT blocked by MTN
+ let urls=[
+  'https://corsproxy.io/?'+encodeURIComponent('https://api.deriv.com/api/ticks_history?app_id=1089&symbol=R_75&count=1&style=ticks&'+Date.now()),
+  'https://api.allorigins.win/raw?url='+encodeURIComponent('https://api.deriv.com/api/ticks_history?app_id=1089&symbol=R_75&count=1&style=ticks&'+Date.now()),
+  'https://thingproxy.freeboard.io/fetch/'+encodeURIComponent('https://api.deriv.com/api/ticks_history?app_id=1089&symbol=R_75&count=1&style=ticks')
+ ];
+ for(let u of urls){
+  try{
+   log('Try '+u.slice(0,40)+'...');
+   let r=await fetch(u);
+   let j=await r.json();
+   log('Proxy OK: '+JSON.stringify(j).slice(0,120));
+   if(j.history&&j.history.prices&&j.history.prices[0]){got(j.history.prices[0]);return true;}
+   if(j.contents){let inner=JSON.parse(j.contents);if(inner.history&&inner.history.prices[0]){got(inner.history.prices[0]);return true;}}
+  }catch(e){log('Proxy fail '+e.message.slice(0,60));}
+ }
+ return false;
+}
+async function loop(){let ok=await fetchProxy();setTimeout(loop, ok?1000:2000);}
+loop();
+</script></body></html></pre>
+        </body>
+    </html>
