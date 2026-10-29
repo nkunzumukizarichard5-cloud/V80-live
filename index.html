@@ -1,31 +1,57 @@
-<html>
-        <head><title>Downloaded HTML</title></head>
-        <body>
-            <pre style="white-space: pre-wrap; word-wrap: break-word;"><!DOCTYPE html><html><head><meta charset=UTF-8><meta name=viewport content="width=device-width,initial-scale=1"><title>V79 PROXY LIVE</title><style>body{background:#000;color:#0f0;padding:10px;font-family:monospace;text-align:center}h2{color:#ff0}#b{background:#222;color:#0ff;padding:12px;border-radius:8px;font-size:22px}#l{background:#111;color:#fff;padding:8px;margin-top:8px;text-align:left;font-size:13px;max-height:400px;overflow:auto}</style></head><body><h2>V79 LIVE - drivetrade.pro PROXY FIX</h2><div id=b>START V79 PROXY...</div><div id=l>Log...</div><script>
-let digits=[],cnt=0;let box=document.getElementById('b'),logEl=document.getElementById('l');
-function log(m){logEl.innerHTML=m+'<br>'+logEl.innerHTML.slice(0,2000);}
-function got(s){let last=parseInt(s.toString().slice(-1));if(isNaN(last))return;digits.push(last);if(digits.length>100)digits.shift();cnt++;box.innerText='LIVE #'+cnt+' LAST:'+last+' PRICE:'+s+' OK PROXY';let c=[0,0,0,0,0,0,0,0,0,0];for(let d of digits)c[d]++;let out='LIVE V79 Count:'+digits.length+'<br>';for(let i=0;i<10;i++)out+='Digit '+i+': '+c[i]+' ('+(digits.length?Math.round(c[i]/digits.length*100):0)+'%)<br>';logEl.innerHTML=out+'<br>Price:'+s+'<br><br>'+logEl.innerHTML.slice(0,1000);}
-async function fetchProxy(){
- // 3 proxies that add CORS - these are HTTPS and NOT blocked by MTN
- let urls=[
-  'https://corsproxy.io/?'+encodeURIComponent('https://api.deriv.com/api/ticks_history?app_id=1089&symbol=R_75&count=1&style=ticks&'+Date.now()),
-  'https://api.allorigins.win/raw?url='+encodeURIComponent('https://api.deriv.com/api/ticks_history?app_id=1089&symbol=R_75&count=1&style=ticks&'+Date.now()),
-  'https://thingproxy.freeboard.io/fetch/'+encodeURIComponent('https://api.deriv.com/api/ticks_history?app_id=1089&symbol=R_75&count=1&style=ticks')
- ];
- for(let u of urls){
-  try{
-   log('Try '+u.slice(0,40)+'...');
-   let r=await fetch(u);
-   let j=await r.json();
-   log('Proxy OK: '+JSON.stringify(j).slice(0,120));
-   if(j.history&&j.history.prices&&j.history.prices[0]){got(j.history.prices[0]);return true;}
-   if(j.contents){let inner=JSON.parse(j.contents);if(inner.history&&inner.history.prices[0]){got(inner.history.prices[0]);return true;}}
-  }catch(e){log('Proxy fail '+e.message.slice(0,60));}
- }
- return false;
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>V80 LIVE FIXED</title>
+<style>
+body{background:#050a14;color:#fff;font-family:monospace;padding:10px}
+.card{background:#0e1e3d;border:1px solid #1a3a6a;border-radius:10px;padding:10px;margin:8px 0}
+input,select,button{padding:10px;border-radius:8px;border:1px solid #2a5a9a;background:#08152e;color:#fff}
+button{background:#00ff88;color:#000;font-weight:bold}
+.log{background:#000;padding:8px;border-radius:8px;height:200px;overflow:auto;font-size:11px}
+.price{font-size:24px;color:#00ffaa;text-align:center}
+</style></head><body>
+<h2 style="text-align:center;color:#00ffaa">V80 LIVE FIXED - DIRECT</h2>
+<div class="card">
+<input id="token" type="password" placeholder="Deriv Token" style="width:60%">
+<button id="c">CONNECT</button>
+<button id="d" disabled>DISC</button>
+<div id="s">Status: Disconnected</div>
+<div id="b">Balance: -</div>
+</div>
+<div class="card">
+<select id="sym"><option value="R_75">R_75</option><option value="R_100">R_100</option><option value="R_50">R_50</option></select>
+<select id="ct"><option value="CALL">Rise</option><option value="PUT">Fall</option></select>
+<input id="st" type="number" value="1" style="width:60px">
+<button id="buy" disabled>BUY</button>
+<div class="price" id="p">---</div>
+</div>
+<div class="card"><div class="log" id="log">V80 FIXED READY - No proxy fail
+1. Paste Deriv token
+2. Tap CONNECT
+</div></div>
+<script>
+let ws=null;
+function L(m){let e=document.getElementById('log');e.innerHTML+='\n'+m;e.scrollTop=1e9}
+function connect(){
+let t=document.getElementById('token').value.trim();
+if(!t){L('Paste token first');return}
+ws=new WebSocket('wss://ws.binaryws.com/websockets/v3?app_id=1089');
+ws.onopen=()=>{L('WS OPEN');ws.send(JSON.stringify({authorize:t}))};
+ws.onmessage=(e)=>{
+let d=JSON.parse(e.data);
+if(d.error){L('ERR '+d.error.message);return}
+if(d.msg_type=='authorize'){L('AUTHORIZED OK '+d.authorize.loginid);document.getElementById('b').innerText='Balance: '+d.authorize.balance;document.getElementById('s').innerText='LIVE Connected';document.getElementById('c').disabled=true;document.getElementById('d').disabled=false;document.getElementById('buy').disabled=false;ws.send(JSON.stringify({ticks:'R_75',subscribe:1}));ws.send(JSON.stringify({balance:1,subscribe:1}))}
+if(d.msg_type=='tick'){document.getElementById('p').innerText=d.tick.quote}
+if(d.msg_type=='balance'){document.getElementById('b').innerText='Balance: '+d.balance.balance}
+if(d.msg_type=='buy'){L('BUY OK ID:'+d.buy.contract_id)}
+};
+ws.onclose=()=>{L('Disconnected');document.getElementById('c').disabled=false}
 }
-async function loop(){let ok=await fetchProxy();setTimeout(loop, ok?1000:2000);}
-loop();
-</script></body></html></pre>
-        </body>
-    </html>
+document.getElementById('c').onclick=connect;
+document.getElementById('d').onclick=()=>ws&&ws.close();
+document.getElementById('buy').onclick=()=>{
+let s=document.getElementById('sym').value,c=document.getElementById('ct').value,st=document.getElementById('st').value;
+ws.send(JSON.stringify({buy:1,price:+st,parameters:{amount:+st,basis:'stake',contract_type:c,currency:'USD',duration:1,duration_unit:'t',symbol:s}}));
+L('BUY '+c+' '+s+' $'+st);
+};
+</script></body></html>
